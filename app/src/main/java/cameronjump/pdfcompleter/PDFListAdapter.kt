@@ -37,7 +37,7 @@ import com.tom_roush.pdfbox.pdmodel.interactive.form.PDField
 import com.tom_roush.pdfbox.pdmodel.interactive.form.PDSignatureField
 import com.tom_roush.pdfbox.pdmodel.interactive.form.PDTextField
 import com.tom_roush.pdfbox.util.PDFBoxResourceLoader
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_pdf.*
 import kotlinx.android.synthetic.main.draw_layout.view.*
 import kotlinx.android.synthetic.main.image_holder.view.*
 import kotlinx.android.synthetic.main.signature_field.view.*
@@ -66,14 +66,6 @@ class PDFListAdapter(private val fileName: String, private val context: Context)
         // Enable Android-style asset loading (highly recommended)
         PDFBoxResourceLoader.init(context.applicationContext)
         // Find the root of the external storage.
-
-        // Need to ask for write permissions on SDK 23 and up, this is ignored on older versions
-        if (ContextCompat.checkSelfPermission(context,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(context as PDFCompleteActivity,
-                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
-        }
 
         //Setup document
         val document = PDDocument.load(assetManager.open(fileName))
@@ -172,7 +164,7 @@ class PDFListAdapter(private val fileName: String, private val context: Context)
                     builder.setPositiveButton("Sign") { dialog, which ->
                         drawingView.drawing_view.saveImage(root.absolutePath, "signature-"+field.name, Bitmap.CompressFormat.PNG, 100)
                         sigKeyValues[field.name] = root.absolutePath + "/signature-"+field.name + ".png"
-
+                        view.invalidate()
                     }
                     val dialog: AlertDialog = builder.create()
 
@@ -240,12 +232,8 @@ class PDFListAdapter(private val fileName: String, private val context: Context)
         document.close()
 
         Log.d(TAG, "Wrote " + documentPath)
-        //signatureDocument.close()
-
-        //setRenderBitmap()
 
         (context as PDFCompleteActivity).completePDF(documentPath)
-        //getView(0, null, null).pdf_view.setImageBitmap(bitmap)
     }
 
     override fun getItemId(position: Int): Long {
